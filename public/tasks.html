@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <title>Task Listing</title>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+      <a class="navbar-brand" href="index.html">My App</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" href="index.html">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="tasks.html">Tasks</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="create.html">Create Task</a>
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  
+  <div class="container">
+  <h1 class="text-center">Task Listing</h1>
+  <div id="tasks" class="text-center">
+    <table id="taskTable" class="table">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Priority</th>
+          <th>Status</th>
+          <th>Edit</th>
+          <th>Delete</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Task rows will be dynamically generated here -->
+      </tbody>
+    </table>
+  </div>
+  </div>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+  <script>
+
+    $(document).ready(function () {
+      // AJAX request to retrieve all tasks
+      $.ajax({
+        url: '/tasks',
+        method: 'GET',
+        success: function (tasks) {
+          // Iterate over the tasks and generate HTML elements to display them
+          tasks.forEach(function (task) {
+            // Create a new row for each task
+            var row = $('<tr>');
+
+            // Add task details as table cells
+            row.append('<td>' + task.title + '</td>');
+            row.append('<td>' + task.priority + '</td>');
+            row.append('<td>' + task.status + '</td>');
+
+            // Create the edit and delete buttons for each task
+            var editBtn = $('<button>').text('Edit').addClass('btn btn-primary edit-btn').attr('data-task-id', task._id);
+            var deleteBtn = $('<button>').text('Delete').addClass('btn btn-danger delete-btn').attr('data-task-id', task._id);
+
+            // Add the buttons as table cells
+            row.append($('<td>').append(editBtn));
+            row.append($('<td>').append(deleteBtn));
+
+            // Append the row to the task table
+            $('#taskTable tbody').append(row);
+          });
+        },
+        error: function (xhr, textStatus, errorThrown) {
+          console.log('Error:', errorThrown);
+        }
+      });
+    });
+
+    // Edit button click event handler
+    $(document).on('click', '.edit-btn', function () {
+      var taskId = $(this).data('task-id');
+      // Redirect to edit.html with the task ID
+      window.location.href = 'edit.html?taskId=' + taskId;
+    });
+
+    // Delete button click event handler
+    $(document).on('click', '.delete-btn', function () {
+      var taskId = $(this).data('task-id');
+      // Send AJAX request to delete the task by task ID
+      console.log("task to be deleted: "+taskId);
+      $.ajax({
+        url: '/tasks/' + taskId,
+        method: 'DELETE',
+        success: function () {
+          // Task deleted successfully, reload the tasks page
+          window.location.href = 'tasks.html';
+        },
+        error: function (xhr, textStatus, errorThrown) {
+          console.log('Error:', errorThrown);
+        }
+      });
+    });
+
+  </script>
+</body>
+</html>
